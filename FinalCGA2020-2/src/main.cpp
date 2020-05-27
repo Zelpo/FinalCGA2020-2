@@ -89,6 +89,12 @@ Box boxLightViewBox;
 ShadowBox * shadowBox;
 
 // Models complex instances
+
+// Laberinto
+Model modelPEA;
+Model modelPEB;
+Model modelPEI;
+Model modelPED;
 // Mayow
 Model mayowModelAnimate;
 // Terrain model instance
@@ -120,6 +126,12 @@ int lastMousePosY, offsetY = 0;
 
 // Model matrix definitions
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+
+// Model matrix Laberinto
+glm::mat4 modelMatrixPEA = glm::mat4(1.0f);
+glm::mat4 modelMatrixPEB = glm::mat4(1.0f);
+glm::mat4 modelMatrixPEI = glm::mat4(1.0f);
+glm::mat4 modelMatrixPED = glm::mat4(1.0f);
 
 int animationIndex = 1;
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
@@ -490,6 +502,19 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Mayow
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
+	
+	//Laberinto
+	modelPEA.loadModel("../models/laberinto/PEA.obj");
+	modelPEA.setShader(&shaderMulLighting);
+
+	modelPEB.loadModel("../models/laberinto/PEB.obj");
+	modelPEB.setShader(&shaderMulLighting);
+
+	modelPEI.loadModel("../models/laberinto/PEI.obj");
+	modelPEI.setShader(&shaderMulLighting);
+
+	modelPED.loadModel("../models/laberinto/PED.obj");
+	modelPED.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 0.0, 10.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
@@ -1049,6 +1074,12 @@ void destroy() {
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
+	
+	// Laberinto delete
+	modelPEA.destroy();
+	modelPEB.destroy();
+	modelPEI.destroy();
+	modelPED.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -1201,6 +1232,12 @@ void applicationLoop() {
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+	
+	// Laberinto
+	modelMatrixPEA = glm::translate(modelMatrixPEA, glm::vec3(0, 0, 0));
+	modelMatrixPEB = glm::translate(modelMatrixPEB, glm::vec3(0, 0, 0));
+	modelMatrixPEI = glm::translate(modelMatrixPEI, glm::vec3(0, 0, 0));
+	modelMatrixPED = glm::translate(modelMatrixPED, glm::vec3(0, 0, 0));
 
 	lastTime = TimeManager::Instance().GetTime();
 
@@ -1446,6 +1483,31 @@ void applicationLoop() {
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 		shaderMulLighting.setInt("shadowMap", 10);
 		shaderTerrain.setInt("shadowMap", 10);
+		
+		/*******************************************
+		 * Laberinto
+		 *******************************************/
+		
+		modelMatrixPEA[3][1] = terrain.getHeightTerrain(modelMatrixPEA[3][0], modelMatrixPEA[3][2]);
+		glm::mat4 modelMatrixPEABody = glm::mat4(modelMatrixPEA);
+		modelMatrixPEABody = glm::scale(modelMatrixPEA, glm::vec3(0.5, 0.5, 0.5));
+		modelPEA.render(modelMatrixPEABody);
+
+		modelMatrixPEB[3][1] = terrain.getHeightTerrain(modelMatrixPEB[3][0], modelMatrixPEB[3][2]);
+		glm::mat4 modelMatrixPEBBody = glm::mat4(modelMatrixPEB);
+		modelMatrixPEBBody = glm::scale(modelMatrixPEB, glm::vec3(0.5, 0.5, 0.5));
+		modelPEB.render(modelMatrixPEBBody);
+
+		modelMatrixPEI[3][1] = terrain.getHeightTerrain(modelMatrixPEI[3][0], modelMatrixPEI[3][2]);
+		glm::mat4 modelMatrixPEIBody = glm::mat4(modelMatrixPEI);
+		modelMatrixPEIBody = glm::scale(modelMatrixPEI, glm::vec3(0.5, 0.5, 0.5));
+		modelPEI.render(modelMatrixPEIBody);
+
+		modelMatrixPED[3][1] = terrain.getHeightTerrain(modelMatrixPED[3][0], modelMatrixPED[3][2]);
+		glm::mat4 modelMatrixPEDBody = glm::mat4(modelMatrixPED);
+		modelMatrixPEDBody = glm::scale(modelMatrixPED, glm::vec3(0.5, 0.5, 0.5));
+		modelPED.render(modelMatrixPEDBody);
+		
 		/*******************************************
 		 * Skybox
 		 *******************************************/
@@ -1483,6 +1545,48 @@ void applicationLoop() {
 		 * Creacion de colliders
 		 * IMPORTANT do this before interpolations
 		 *******************************************/
+		
+		// Collider del Laberinto
+
+		glm::mat4 modelMatrixColliderPEA = glm::mat4(modelMatrixPEA);
+		AbstractModel::OBB PEACollider;
+		PEACollider.u = glm::quat_cast(modelMatrixPEA);
+		modelMatrixColliderPEA[3][1] = terrain.getHeightTerrain(modelMatrixColliderPEA[3][0], modelMatrixColliderPEA[3][2]);
+		modelMatrixColliderPEA = glm::scale(modelMatrixColliderPEA, glm::vec3(0.5, 0.5, 0.5));
+		modelMatrixColliderPEA = glm::translate(modelMatrixColliderPEA, modelPEA.getObb().c);
+		PEACollider.c = glm::vec3(modelMatrixColliderPEA[3]);
+		PEACollider.e = modelPEA.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		addOrUpdateColliders(collidersOBB, "PEA", PEACollider, modelMatrixPEA);
+
+		glm::mat4 modelMatrixColliderPEB = glm::mat4(modelMatrixPEB);
+		AbstractModel::OBB PEBCollider;
+		PEBCollider.u = glm::quat_cast(modelMatrixPEB);
+		modelMatrixColliderPEB[3][1] = terrain.getHeightTerrain(modelMatrixColliderPEB[3][0], modelMatrixColliderPEB[3][2]);
+		modelMatrixColliderPEB = glm::scale(modelMatrixColliderPEB, glm::vec3(0.5, 0.5, 0.5));
+		modelMatrixColliderPEB = glm::translate(modelMatrixColliderPEB, modelPEB.getObb().c);
+		PEBCollider.c = glm::vec3(modelMatrixColliderPEB[3]);
+		PEBCollider.e = modelPEB.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		addOrUpdateColliders(collidersOBB, "PEB", PEBCollider, modelMatrixPEB);
+
+		glm::mat4 modelMatrixColliderPEI = glm::mat4(modelMatrixPEI);
+		AbstractModel::OBB PEICollider;
+		PEICollider.u = glm::quat_cast(modelMatrixPEI);
+		modelMatrixColliderPEI[3][1] = terrain.getHeightTerrain(modelMatrixColliderPEI[3][0], modelMatrixColliderPEI[3][2]);
+		modelMatrixColliderPEI = glm::scale(modelMatrixColliderPEI, glm::vec3(0.5, 0.5, 0.5));
+		modelMatrixColliderPEI = glm::translate(modelMatrixColliderPEI, modelPEI.getObb().c);
+		PEICollider.c = glm::vec3(modelMatrixColliderPEI[3]);
+		PEICollider.e = modelPEI.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		addOrUpdateColliders(collidersOBB, "PEI", PEICollider, modelMatrixPEI);
+
+		glm::mat4 modelMatrixColliderPED = glm::mat4(modelMatrixPED);
+		AbstractModel::OBB PEDCollider;
+		PEDCollider.u = glm::quat_cast(modelMatrixPED);
+		modelMatrixColliderPED[3][1] = terrain.getHeightTerrain(modelMatrixColliderPED[3][0], modelMatrixColliderPED[3][2]);
+		modelMatrixColliderPED = glm::scale(modelMatrixColliderPED, glm::vec3(0.5, 0.5, 0.5));
+		modelMatrixColliderPED = glm::translate(modelMatrixColliderPED, modelPED.getObb().c);
+		PEDCollider.c = glm::vec3(modelMatrixColliderPED[3]);
+		PEDCollider.e = modelPED.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		addOrUpdateColliders(collidersOBB, "PED", PEDCollider, modelMatrixPED);
 
 		// Collider de mayow
 		AbstractModel::OBB mayowCollider;
