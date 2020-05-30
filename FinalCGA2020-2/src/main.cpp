@@ -90,6 +90,15 @@ ShadowBox * shadowBox;
 
 // Models complex instances
 
+// Boo's
+Model modelBoo1;
+Model modelBoo2;
+Model modelBoo3;
+Model modelBoo4;
+
+//Cuerpo de la camara
+Model modelCuerpo;
+
 // Laberinto
 Model modelPEA;
 Model modelPEB;
@@ -313,6 +322,11 @@ int lastMousePosY, offsetY = 0;
 
 // Model matrix definitions
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+glm::mat4 modelMatrixBoo1 = glm::mat4(1.0f);
+glm::mat4 modelMatrixBoo2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixBoo3 = glm::mat4(1.0f);
+glm::mat4 modelMatrixBoo4 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCuerpo = glm::mat4(1.0f);
 
 // Model matrix Laberinto
 glm::mat4 modelMatrixPEA = glm::mat4(1.0f);
@@ -875,6 +889,23 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Mayow
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
+	
+	//Boo's
+	modelBoo1.loadModel("../models/Boo/Boo1.obj");
+	modelBoo1.setShader(&shaderMulLighting);
+
+	modelBoo2.loadModel("../models/Boo/Boo2.obj");
+	modelBoo2.setShader(&shaderMulLighting);
+
+	modelBoo3.loadModel("../models/Boo/Boo3.obj");
+	modelBoo3.setShader(&shaderMulLighting);
+
+	modelBoo4.loadModel("../models/Boo/Boo4.obj");
+	modelBoo4.setShader(&shaderMulLighting);
+
+	// Cuerpo
+	modelCuerpo.loadModel("../models/Cuerpo/Cuerpo.obj");
+	modelCuerpo.setShader(&shaderMulLighting);
 	
 	//Laberinto
 	modelPEA.loadModel("../models/laberinto/PEA.obj");
@@ -2007,6 +2038,13 @@ void destroy() {
 	// Custom objects animate
 	mayowModelAnimate.destroy();
 	
+	modelBoo1.destroy();
+	modelBoo2.destroy();
+	modelBoo3.destroy();
+	modelBoo4.destroy();
+
+	modelCuerpo.destroy();
+	
 	// Laberinto delete
 	modelPEA.destroy();
 	modelPEB.destroy();
@@ -2351,6 +2389,13 @@ void applicationLoop() {
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+	
+	modelMatrixBoo1 = glm::translate(modelMatrixBoo1, glm::vec3(0, 0, 0));
+	modelMatrixBoo2 = glm::translate(modelMatrixBoo2, glm::vec3(0, 0, 0));
+	modelMatrixBoo3 = glm::translate(modelMatrixBoo3, glm::vec3(0, 0, 0));
+	modelMatrixBoo4 = glm::translate(modelMatrixBoo4, glm::vec3(0, 0, 0));
+
+	modelMatrixCuerpo = glm::translate(modelMatrixCuerpo, glm::vec3(0, 0, 0));
 	
 	// Laberinto
 	modelMatrixPEA = glm::translate(modelMatrixPEA, glm::vec3(0, 0, 0));
@@ -2788,6 +2833,35 @@ void applicationLoop() {
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 		shaderMulLighting.setInt("shadowMap", 10);
 		shaderTerrain.setInt("shadowMap", 10);
+		
+		// Boo's
+
+		modelMatrixBoo1[3][1] = terrain.getHeightTerrain(modelMatrixBoo1[3][0], modelMatrixBoo1[3][2]);
+		glm::mat4 modelMatrixBoo1Body = glm::mat4(modelMatrixBoo1);
+		modelMatrixBoo1Body = glm::scale(modelMatrixBoo1, glm::vec3(0.5, 0.5, 0.5));
+		modelBoo1.render(modelMatrixBoo1Body);
+
+		modelMatrixBoo2[3][1] = terrain.getHeightTerrain(modelMatrixBoo2[3][0], modelMatrixBoo2[3][2]);
+		glm::mat4 modelMatrixBoo2Body = glm::mat4(modelMatrixBoo2);
+		modelMatrixBoo2Body = glm::scale(modelMatrixBoo2, glm::vec3(0.5, 0.5, 0.5));
+		modelBoo2.render(modelMatrixBoo2Body);
+
+		modelMatrixBoo3[3][1] = terrain.getHeightTerrain(modelMatrixBoo3[3][0], modelMatrixBoo3[3][2]);
+		glm::mat4 modelMatrixBoo3Body = glm::mat4(modelMatrixBoo3);
+		modelMatrixBoo3Body = glm::scale(modelMatrixBoo3, glm::vec3(0.5, 0.5, 0.5));
+		modelBoo3.render(modelMatrixBoo3Body);
+
+		modelMatrixBoo4[3][1] = terrain.getHeightTerrain(modelMatrixBoo4[3][0], modelMatrixBoo4[3][2]);
+		glm::mat4 modelMatrixBoo4Body = glm::mat4(modelMatrixBoo4);
+		modelMatrixBoo4Body = glm::scale(modelMatrixBoo4, glm::vec3(0.5, 0.5, 0.5));
+		modelBoo4.render(modelMatrixBoo4Body);
+
+		// Cuerpo
+
+		modelMatrixCuerpo[3][1] = terrain.getHeightTerrain(modelMatrixCuerpo[3][0], modelMatrixCuerpo[3][2]);
+		glm::mat4 modelMatrixCuerpoBody = glm::mat4(modelMatrixCuerpo);
+		modelMatrixCuerpoBody = glm::scale(modelMatrixCuerpo, glm::vec3(0.5, 0.5, 0.5));
+		modelCuerpo.render(modelMatrixCuerpoBody);
 		
 		/*******************************************
 		 * Laberinto
@@ -3780,6 +3854,60 @@ void applicationLoop() {
 		 * Creacion de colliders
 		 * IMPORTANT do this before interpolations
 		 *******************************************/
+		
+		// Collider de los Boo's
+
+		glm::mat4 modelMatrixColliderBoo1 = glm::mat4(modelMatrixBoo1);
+		AbstractModel::OBB Boo1Collider;
+		Boo1Collider.u = glm::quat_cast(modelMatrixBoo1);
+		modelMatrixColliderBoo1[3][1] = terrain.getHeightTerrain(modelMatrixColliderBoo1[3][0], modelMatrixColliderBoo1[3][2]);
+		modelMatrixColliderBoo1 = glm::scale(modelMatrixColliderBoo1, glm::vec3(0.5, 0.5, 0.5));
+		modelMatrixColliderBoo1 = glm::translate(modelMatrixColliderBoo1, modelBoo1.getObb().c);
+		Boo1Collider.c = glm::vec3(modelMatrixColliderBoo1[3]);
+		Boo1Collider.e = modelBoo1.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		addOrUpdateColliders(collidersOBB, "Boo1", Boo1Collider, modelMatrixBoo1);
+
+		glm::mat4 modelMatrixColliderBoo2 = glm::mat4(modelMatrixBoo2);
+		AbstractModel::OBB Boo2Collider;
+		Boo2Collider.u = glm::quat_cast(modelMatrixBoo2);
+		modelMatrixColliderBoo2[3][1] = terrain.getHeightTerrain(modelMatrixColliderBoo2[3][0], modelMatrixColliderBoo2[3][2]);
+		modelMatrixColliderBoo2 = glm::scale(modelMatrixColliderBoo2, glm::vec3(0.5, 0.5, 0.5));
+		modelMatrixColliderBoo2 = glm::translate(modelMatrixColliderBoo2, modelBoo2.getObb().c);
+		Boo2Collider.c = glm::vec3(modelMatrixColliderBoo2[3]);
+		Boo2Collider.e = modelBoo2.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		addOrUpdateColliders(collidersOBB, "Boo2", Boo2Collider, modelMatrixBoo2);
+
+		glm::mat4 modelMatrixColliderBoo3 = glm::mat4(modelMatrixBoo3);
+		AbstractModel::OBB Boo3Collider;
+		Boo3Collider.u = glm::quat_cast(modelMatrixBoo3);
+		modelMatrixColliderBoo3[3][1] = terrain.getHeightTerrain(modelMatrixColliderBoo3[3][0], modelMatrixColliderBoo3[3][2]);
+		modelMatrixColliderBoo3 = glm::scale(modelMatrixColliderBoo3, glm::vec3(0.5, 0.5, 0.5));
+		modelMatrixColliderBoo3 = glm::translate(modelMatrixColliderBoo3, modelBoo3.getObb().c);
+		Boo3Collider.c = glm::vec3(modelMatrixColliderBoo3[3]);
+		Boo3Collider.e = modelBoo3.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		addOrUpdateColliders(collidersOBB, "Boo3", Boo3Collider, modelMatrixBoo3);
+
+		glm::mat4 modelMatrixColliderBoo4 = glm::mat4(modelMatrixBoo4);
+		AbstractModel::OBB Boo4Collider;
+		Boo4Collider.u = glm::quat_cast(modelMatrixBoo4);
+		modelMatrixColliderBoo4[3][1] = terrain.getHeightTerrain(modelMatrixColliderBoo4[3][0], modelMatrixColliderBoo4[3][2]);
+		modelMatrixColliderBoo4 = glm::scale(modelMatrixColliderBoo4, glm::vec3(0.5, 0.5, 0.5));
+		modelMatrixColliderBoo4 = glm::translate(modelMatrixColliderBoo4, modelBoo4.getObb().c);
+		Boo4Collider.c = glm::vec3(modelMatrixColliderBoo4[3]);
+		Boo4Collider.e = modelBoo4.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		addOrUpdateColliders(collidersOBB, "Boo4", Boo4Collider, modelMatrixBoo4);
+
+		// Collider del Cuerpo
+
+		glm::mat4 modelMatrixColliderCuerpo = glm::mat4(modelMatrixCuerpo);
+		AbstractModel::OBB CuerpoCollider;
+		CuerpoCollider.u = glm::quat_cast(modelMatrixCuerpo);
+		modelMatrixColliderCuerpo[3][1] = terrain.getHeightTerrain(modelMatrixColliderCuerpo[3][0], modelMatrixColliderCuerpo[3][2]);
+		modelMatrixColliderCuerpo = glm::scale(modelMatrixColliderCuerpo, glm::vec3(0.5, 0.5, 0.5));
+		modelMatrixColliderCuerpo = glm::translate(modelMatrixColliderCuerpo, modelCuerpo.getObb().c);
+		CuerpoCollider.c = glm::vec3(modelMatrixColliderCuerpo[3]);
+		CuerpoCollider.e = modelCuerpo.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		addOrUpdateColliders(collidersOBB, "Cuerpo", CuerpoCollider, modelMatrixCuerpo);
 		
 		// Collider del Laberinto
 
