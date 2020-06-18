@@ -78,7 +78,7 @@ Shader shaderViewDepth;
 Shader shaderDepth;
 
 std::shared_ptr<Camera> camera(new ThirdPersonCamera());
-float distanceFromTarget = 3.0;
+float distanceFromTarget = 0.1;
 
 Sphere skyboxSphere(20, 20);
 Box boxCollider;
@@ -526,10 +526,7 @@ bool enableCountSelected = true;
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = {
-		{"aircraft", glm::vec3(10.0, 0.0, -17.5)},
-		{"lambo", glm::vec3(23.0, 0.0, 0.0)},
-		{"heli", glm::vec3(5.0, 10.0, -5.0)},
-		{"fountain", glm::vec3(5.0, 0.0, -40.0)},
+		{"fountain", glm::vec3(-2.1f, 2.1f, -45.5)},
 		{"fire", glm::vec3(0.0, 0.0, 7.0)}
 };
 
@@ -539,7 +536,7 @@ double currTime, lastTime;
 // Definition for the particle system
 GLuint initVel, startTime;
 GLuint VAOParticles;
-GLuint nParticles = 8000;
+GLuint nParticles = 16000;
 double currTimeParticlesAnimation, lastTimeParticlesAnimation;
 
 // Definition for the particle system fire
@@ -626,8 +623,8 @@ void initParticleBuffers() {
 		phi = glm::mix(0.0f, glm::two_pi<float>(), ((float)rand() / RAND_MAX));
 
 		v.x = sinf(theta) * cosf(phi);
-		v.y = cosf(theta);
-		v.z = sinf(theta) * sinf(phi);
+		v.y = sinf(theta) * sinf(phi);
+		v.z = cosf(theta);
 
 		velocity = glm::mix(0.6f, 0.8f, ((float)rand() / RAND_MAX));
 		v = glm::normalize(v) * velocity;
@@ -2246,6 +2243,8 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	distanceFromTarget -= yoffset;
 	if (distanceFromTarget > 5.0)
 		distanceFromTarget = 5.0;
+	if (distanceFromTarget < 0.1)
+		distanceFromTarget = 0.1;
 	camera->setDistanceFromTarget(distanceFromTarget);
 }
 
@@ -6015,15 +6014,38 @@ void renderScene(bool renderParticles){
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_CULL_FACE);
 	for(std::map<float, std::pair<std::string, glm::vec3> >::reverse_iterator it = blendingSorted.rbegin(); it != blendingSorted.rend(); it++){
-		
-
-			/****************************+
-			 * Open AL sound data
+		if (renderParticles && it->second.first.compare("fountain") == 0) {
+			/**********
+			 * Init Render particles systems
 			 */
-
+			glm::mat4 modelMatrixParticlesFountain = glm::mat4(1.0);
+			modelMatrixParticlesFountain = glm::translate(modelMatrixParticlesFountain, it->second.second);
+			modelMatrixParticlesFountain = glm::scale(modelMatrixParticlesFountain, glm::vec3(3.0, 3.0, 3.0));
+			currTimeParticlesAnimation = TimeManager::Instance().GetTime();
+			if (currTimeParticlesAnimation - lastTimeParticlesAnimation > 10.0)
+				lastTimeParticlesAnimation = currTimeParticlesAnimation;
+			//glDisable(GL_DEPTH_TEST);
+			glDepthMask(GL_FALSE);
+			// Set the point size
+			glPointSize(10.0f);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, textureParticleFountainID);
+			shaderParticlesFountain.turnOn();
+			shaderParticlesFountain.setFloat("Time", float(currTimeParticlesAnimation - lastTimeParticlesAnimation));
+			shaderParticlesFountain.setFloat("ParticleLifetime", 3.5f);
+			shaderParticlesFountain.setInt("ParticleTex", 0);
+			shaderParticlesFountain.setVectorFloat3("Gravity", glm::value_ptr(glm::vec3(0.0f, -9.81f, 0.0f)));
+			shaderParticlesFountain.setMatrix4("model", 1, false, glm::value_ptr(modelMatrixParticlesFountain));
+			glBindVertexArray(VAOParticles);
+			glDrawArrays(GL_POINTS, 0, nParticles);
+			glDepthMask(GL_TRUE);
+			//glEnable(GL_DEPTH_TEST);
+			shaderParticlesFountain.turnOff();
 			/**********
 			 * End Render particles systems
 			 */
+		}
+
 	}
 	glEnable(GL_CULL_FACE);
 }
