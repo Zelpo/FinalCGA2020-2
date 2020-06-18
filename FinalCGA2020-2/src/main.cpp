@@ -96,7 +96,7 @@ Model modelBoo2;
 Model modelBoo3;
 Model modelBoo4;
 
-//Cuerpo de la camara
+//Pared de la entrada
 Model modelCuerpo;
 
 // Laberinto
